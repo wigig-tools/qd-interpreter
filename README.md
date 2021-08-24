@@ -35,45 +35,33 @@ For the purpose of this document, we will use the _Raw Spatial Sharing _scenario
 
 ```$ python qdVisualizer.py --s RawSpatialSharing```
 
-The first time a scenario is launched, it just reads the input from the \qdsoftware software and ns-3 and nothing is configured for the visualization itself. Once the \software is launched, you should obtain the visualization displayed on Fig.~\ref{fig:rawSpatialSharingInit}.
+The first time a scenario is launched, it just reads the input from the NIST Q-D channel realization software and ns-3 and nothing is configured for the visualization itself. Once the visualizer is launched, you should obtain the visualization displayed on the figure below.
 
 
-<img src="docs/img/RawSSFirstLaunch.png" alt="drawing" width="700">
+<img src="docs/img/RawSSFirstLaunch.png" alt="drawing">
 
 
-![Test](docs/RawSSFirstLaunch.png)
-We can observe that the \software is made of two main windows that we will refer to as \textit{Left View} and \textit{Right view}. The first time that a scenario is launched, all the faces of the 3D geometry of the environment are set to be opaque. The first thing to do is to configure the visualization correctly to display what we want to visualize. For an indoor scenario, we must select the faces to hide in order to visualize the indoor environment. To do so, click on the \textit{Environment Interaction} tab in the menu. Then, select the top face of the left view. It should be now colored in red to state that it's currently selected. Finally, 
+We can observe that the visualizer is made of two main windows that we will refer to as *Left View* and *Right view*. The first time that a scenario is launched, all the faces of the 3D geometry of the environment are set to be opaque. The first thing to do is to configure the visualization correctly to display what we want to visualize. For an indoor scenario, we must select the faces to hide in order to visualize the indoor environment. To do so, click on the *Environment Interaction* tab in the GUI. Then, select the top face of the left view. It should be now colored in red to state that it's currently selected as displayed in the figure below.
 
-\begin{figure}[t!]
-\centering
-\begin{subfigure}{0.4\textwidth}
-  \centering
-  \includegraphics[width=7in]{Figures/RawSSFrontFaceCulling.png}
-  \caption{Default scenario}
-  \label{fig:visualizer1}
-\end{subfigure}% 
+<img src="docs/img/RawSSFrontFaceCulling.png" alt="drawing">
 
-\begin{subfigure}{0.4\textwidth}
-  \centering
-  \includegraphics[width=7in]{Figures/RawSSBothTopFacesCulled.png}
-  \caption{Scenario with multiple \glspl{paa} per device}
-  \label{fig:visualizer2}
-\end{subfigure}
-\caption{Screenshots of in-built visualization app.}
-\vspace{-0.5cm}
-\label{fig:visualizer}
-\end{figure}
+Finally, click on the option *Front* that appears in the *Face Culling* box. 
+The top face of the room should now be hidden. *Front face culling* must be used to hide a face whose normal is facing the camera while back face culling is doing the opposite. 
 
+You should now have a view of the inside of the room on the *left view* as displayed on the picture below. 
 
+<img src="docs/img/RawSSFrontFaceCulled.png" alt="drawing">
 
+Try to apply front face culling to the side facea in order to reveal more of the inside of the room on both the *left and right* view. 
+The video below summarizes all the steps we perform to obtain a view that can be usable for visualization. 
 
-\begin{figure}[t!]
-\center
-\includegraphics[width = \columnwidth]{Figures/RawSSFirstLaunch.png}
-\caption[]{Initial view of the raw Spatial Sharing scenario}
-\label{fig:rawSpatialSharingInit}
-\end{figure}
+The video below summarizes the steps performed.
 
+<img src="docs/gif/RawSSCompleteEnvironmentConf.gif" alt="drawing">
+
+If you want to keep the visualization configuration created for the scenario, just hit the *Save Environment* button highlighted in the picture below and the configuration will be loaded the text type you launch the scenario. 
+
+<img src="docs/img/RawSSHighlightsSave.png" alt="drawing">
 
 
 # Q-D Interpreter
