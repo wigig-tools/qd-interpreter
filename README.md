@@ -1,6 +1,6 @@
 # The NIST Q-D Interpreter Software
 
-The NIST Q-D Interpreter software has been developed to help visualizing Beamforming Training (BT) results using 3D visualization. This software is part of the [NIST Q-D Framework](https://github.com/wigig-tools) and at such is using input for both the [NIST Q-D Channel Realization software](https://github.com/wigig-tools/qd-realization) and [ns-3 802.11ad/ay implementation](https://github.com/wigig-tools/wigig-module).
+The NIST Q-D Interpreter software has been developed to help visualizing Beamforming Training (BT) results using 3D visualization. This software is part of the [NIST Q-D Framework](https://github.com/wigig-tools) and at such is using input from both the [NIST Q-D Channel Realization software](https://github.com/wigig-tools/qd-realization) and [ns-3 802.11ad/ay implementation](https://github.com/wigig-tools/wigig-module).
 
 The NIST Q-D Interpreter software is developed in Python and uses the [Mayavi](https://docs.enthought.com/mayavi/mayavi/) library. 
 It provides a flexible, scalable 3D visualizer to analyze BT results and more particularly:
@@ -12,14 +12,63 @@ Recently, sensing visualizations were added to allow:
 * Visualization of human targets moving and their associated Multi-Paths Components (MPCs)
 * Visualization of the doppler range map
 
-It is worth mentioning that the The NIST Q-D Interpreter software comes with its own implementation of the Q-D propagation model which allows to visualize the BT results without having to use system-level simulations.
+It is worth mentioning that the The NIST Q-D Interpreter software comes with its own implementation of the Q-D propagation model which allows to visualize the BT results without having to perform system-level simulations in ns-3.
 
 This wiki is organized as follows:
-* Section [Installation](#installation) describes how to install the NIST Q-D Interpreter software
-* Section [First Steps](#first-steps) helps to user to get familiar with the visualizer. In particular, it shows how to launch the visualizer and configure the different visualization options to customize the visualizer appearance
-* how to visualize \gls{SLS} \gls{BT} results
+* Section [Installation](#installation) describes how to install the NIST Q-D Interpreter software.
+* Section [First Steps](#first-steps) helps to user to get familiar with the visualizer. In particular, it shows how to launch the visualizer and configure the different visualization options to customize the visualizer appearance.
+* Section [SLS Visualization](#sls-visualization) describes how to visualize the SLS BT results.
 
 # Installation
+
+To install the visualizer, we recommend to use anaconda. 
+To do so, you need first to install Anaconda (https://www.anaconda.com/). 
+Please select the installation for Python version 3.7. 
+Once Anaconda is installed, open the Anaconda Prompt and use the following command:
+
+`$ conda create -n yourEnvName python=3.7 pyqt=5 `
+
+then:
+
+`$ conda activate yourEnvName `
+
+Install Mayavi:
+
+`$ conda install -c menpo mayavi`
+
+Install pyqtgraph:
+
+`$ pip install pyqtgraph`
+
+Install numba:
+
+`$ pip install numba`
+
+Install Pandas
+
+`$ conda install -c anaconda pandas`
+
+Install Quaternion
+
+`conda install -c conda-forge quaternion`
+
+Install Matplotlib
+
+`conda install -c conda-forge matplotlib`
+
+
+Install Scipy
+
+`conda install -c anaconda scipy`
+
+On windows system, there seems to be a bug (see https://stackoverflow.com/questions/53889284/python-importing-mayavi-mlab-produces-syntax-error) 
+So if using Windows and you face problems running the visualizer, perform the two following commands:
+
+`$ pip uninstall apptools`
+
+`$ pip install -U apptools`
+
+You should be ready to use the Q-D visualizer.
 
 # First Steps
 
@@ -29,12 +78,11 @@ To launch the visualizer, the scenario name must be specified using the `--s` op
  
 `$ python qdVisualizer.py --s scenarioName`
 
-For the purpose of this document, we will use the _Raw Spatial Sharing _scenario as an example scenario. It gives us the following command:
+For the purpose of this section, we will use the `Raw Spatial Sharing` scenario as an example scenario. It gives us the following command:
 
 ```$ python qdVisualizer.py --s RawSpatialSharing```
 
 The first time a scenario is launched, it just reads the input from the NIST Q-D channel realization software and ns-3 and nothing is configured for the visualization itself. Once the visualizer is launched, you should obtain the visualization displayed on the figure below.
-
 
 <img src="docs/img/RawSSFirstLaunch.png" alt="drawing">
 
@@ -44,7 +92,7 @@ The first thing to do is to configure the visualization correctly to display wha
 
 
 ## Configuring the 3D environment appearance 
-For an indoor scenario such as the Raw Spatial Sharing scenario, we must select the faces to hide in order to visualize the indoor environment. 
+For an indoor scenario such as the `Raw Spatial Sharing` scenario, we must select the faces to hide in order to visualize the indoor environment. 
 To do so, click on the `Environment Interaction` tab in the GUI. 
 Then, select the top face of the left view. 
 It should be now colored in red to state that it's currently selected as displayed in the figure below.
@@ -58,10 +106,7 @@ You should now have a view of the inside of the room on the `left view` as displ
 
 <img src="docs/img/RawSSFrontFaceCulled.png" alt="drawing">
 
-Try to apply front face culling to the side facea in order to reveal more of the inside of the room on both the `left` `right` view. 
-The video below summarizes all the steps we perform to obtain a view that can be usable for visualization. 
-
-The video below summarizes the steps performed.
+Try to apply front face culling to the side faces in order to reveal more of the inside of the room on both the `left` and `right` view. The video below summarizes all the steps we perform to obtain a view that can be usable for visualization. 
 
 <img src="docs/gif/RawSSCompleteEnvironmentConf.gif" alt="drawing">
 
@@ -71,40 +116,40 @@ If you want to keep the visualization configuration created for the scenario, ju
 
 ## Tweaking nodes, antenna arrays and MPCs appearance
 When the visualizer is launched for the first time for a scenario, it's using default values for:
-* nodes size
-* nodes labels  
-* Phased Antenna Arrays (PAAs) size
-* MPCs size and colors
-* On wich views to display nodes, nodes 3D Models, nodes labels and PAAs
+* nodes size.
+* nodes labels. 
+* Phased Antenna Arrays (PAAs) size.
+* MPCs size and colors.
+* On wich views to display nodes, nodes 3D Models, nodes labels and PAAs.
 
-After the configuration done in Section XXX, the `Raw Spatial Sharing` scenario is as depicted on the figure below. 
+
+After the configuration done in the previous [section](#configuring-the-3D-environment-appearance), the `Raw Spatial Sharing` scenario is as depicted on the figure below. 
 
 <img src="docs/img/RawSSBeforeConfigure.png" alt="drawing">
 
-We can see that the MPCs different reflections order are hard to distinguish, that the nodes representations hide the nodes PAAs.  
+We can see that the MPCs different reflections order are hard to distinguish and that the nodes representations hide the nodes PAAs.  
 
 The NIST Q-D interpreter can be used for a wide variety of scenario (indoor, outdoors, all variable in size) and thus, it's needed to configure the nodes, PAAs and MPCs visualization when first launching a scenario. 
 
 To do so, one must select the `Visualization Tweak` tab in the GUI.
 
-Each node is represented by a 3D sphere. Set the STAs and APs size to '0.4' as displayed below. 
+Each node is represented by a 3D sphere. Set the STAs and APs size to `0.4` as displayed below. 
 
 <img src="docs/img/RawSSSetNodesSize.png" alt="drawing">
 
-Each node PAA element is represented with cubes. Set the PAA size to '2' as displayed below. 
+Each node PAA element is represented with cubes. Set the PAA size to `2` as displayed below. 
 
 <img src="docs/img/RawSSSetPAAsSize.png" alt="drawing">
 
-By default, MPCs all have the same width and LoS MPC is colored in blue, 2nd order reflection in red, and third order in green. Set the LoS reflection thickness to `0.1` by selecting `MPCs reflection` 0 in the list and set 'MPCs size' to 0.1 as displayed below.
+By default, MPCs all have the same width and LoS MPC is colored in blue, 2nd order reflection in red, and third order in green. Set the LoS reflection thickness to `0.1` by selecting `MPCs reflection` `0` in the list and set 'MPCs size' to `0.1` as displayed below.
 
 <img src="docs/img/RawSSSetMPCsSize.png" alt="drawing">
 
 Proceed the same way to set the 1st order reflection to `0.05` and 2nd order reflection to `0.01`.
 
-The visualization of the scenario should now look like the picture displayed below and we can clearly see the devices, the PAAs, and distinghish the MPCs corresponding to each reflection order. 
+The visualization of the scenario should now look like the picture displayed below and we can clearly see the devices, the PAAs, and distingish the MPCs corresponding to each reflection order. 
 
 <img src="docs/img/RawSSConfigurationDone.png" alt="drawing">
-
 
 If you want to save the configuration, just click on `Save Config` as displayed below.
 
@@ -113,7 +158,7 @@ If you want to save the configuration, just click on `Save Config` as displayed 
 The next time the visualizer will be launched for this scenario, the configuration done will be used to display Nodes, PAAs, and MPCs. 
 
 
-Each node can also use a 3D models. For this, click on the `Display 3D Objects` as displayed below.
+Each type of nodes (APs or STAs) can also use a 3D model. For this, click on the `Display 3D Objects` as displayed below.
 
 <img src="docs/img/RawSSWithModels.png" alt="drawing">
 
@@ -127,13 +172,17 @@ The STAs model is displayed below.
 
 <img src="docs/img/staDefaultModel.png" alt="drawing" width=150>
 
-Please note that these 3D models are pretty simple. One can still import any 3D models in the visualizer. To do so, please refer to Section XXX.  
+Please note that these 3D models are pretty simple. One can still import any 3D models in the visualizer. To do so, please refer to Section TODO.  
 
 ## Interacting with a scenario
 
 The `Raw Spatial Sharing` scenario is made of 1 AP (AP0) and 3 STAs (STA1, STA2, STA3). The scenario is made of 100 traces and STA3 is the only node moving along the y-axis. To interact with the scenario, select the `Scenario Interaction` tab in the GUI. 
 
-To go to a specific trace, just enter the traces you want to visualize in the `Trace` GUI as displayed below. 
+To go to a specific trace, just enter the traces you want to visualize in the `Trace` GUI as displayed below.
+
+
+<img src="docs/img/RawSSSetTraces.png" alt="drawing">
+
 To iterate over the traces, the toolbar displayed below is provided. 
 
 <img src="docs/img/iterationIcons.png" alt="drawing">
@@ -145,7 +194,7 @@ The video below shows the iteration over all the traces.
 
 <img src="docs/gif/RawSSNode0to1.gif" alt="drawing">
 
-On this video, we can observe STA3 moving along the y axis as expected. However, the right view remains static. It is as expected as by default, the visualizer displays the MPCs for a transmitter set to node 0 (AP0) and node 1 (STA1). Both of these nodes are static so the MPCs remaing the same all along the scenario.
+On this video, we can observe STA3 moving along the y axis as expected. However, the right view remains static. It is as expected as by default, the visualizer displays the MPCs for a transmitter set to node 0 (AP0) and node 1 (STA1) as a receiver. Both of these nodes are static so the MPCs remain the same all along the scenario.
 
 To change the transmitter or receiver node, just change the value of `TX Nodes` and `Rx Nodes` in the GUI as displayed below in the video. 
 
@@ -160,14 +209,13 @@ There are two ways to visualize the SLS BT:
 * Using ns-3 results
 
 In order to enable the SLS visualization, the option `--sls` must be used. 
-
 ## SLS Visualization with the Oracle mode
 
 The oracle mode allows to visualize SLS results without running the scenario in ns-3. The Q-D propagation model developped in ns-3 has been reimplemented in Python to obtain the results.
 
 To visualize SLS Oracle results, two modes are available:
-* online: The SLS results are computed while visualizing. This method allows to load the scenario faster but is slower to display the SLS results
-* preprocessed: The entire SLS results between every pair of nodes are computed the first time that the scenario is launched, and saved for next time the scenario will be visualized. This method is slower to launch the first time, but faster to display the SLS results when visualizing
+* online: The SLS results are computed while visualizing. This method allows to load the scenario faster but is slower to display the SLS results.
+* preprocessed: The entire SLS results between every pair of nodes are computed the first time that the scenario is launched, and saved for next time the scenario will be visualized. This method is slower to launch the first time, but faster to display the SLS results when visualizing the scenario, and faster to load the next time the scenario is loaded.
 
 It is worth mentionning that the configuration of this mode requires to add the option `dataMode`. By default, the `dataMode` is set to `none` and the oracle SLS results are not available. 
 
