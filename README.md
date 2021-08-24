@@ -37,20 +37,9 @@ For the purpose of this document, we will use the _Raw Spatial Sharing _scenario
 
 The first time a scenario is launched, it just reads the input from the \qdsoftware software and ns-3 and nothing is configured for the visualization itself. Once the \software is launched, you should obtain the visualization displayed on Fig.~\ref{fig:rawSpatialSharingInit}.
 
-[Kiku](/docs/img/RawSSFirstLaunch.png)
 
-[[docs/img/RawSSFirstLaunch.png|align=right]]
+<img src="docs/img/RawSSFirstLaunch.png" alt="drawing" width="700">
 
-
-![Alt text](/docs/RawSSFirstLaunch.png?raw=true "Optional Title")
-
-[link text](docs/RawSSFirstLaunch.png "ALT TEXT")
-
-[link text](docs/RawSSFirstLaunch.png "ALT TEXT")
-
-[[/docs/RawSSFirstLaunch.png|ALT TEXT]]
-
-[[docs/RawSSFirstLaunch.png|align=right]]
 
 ![Test](docs/RawSSFirstLaunch.png)
 We can observe that the \software is made of two main windows that we will refer to as \textit{Left View} and \textit{Right view}. The first time that a scenario is launched, all the faces of the 3D geometry of the environment are set to be opaque. The first thing to do is to configure the visualization correctly to display what we want to visualize. For an indoor scenario, we must select the faces to hide in order to visualize the indoor environment. To do so, click on the \textit{Environment Interaction} tab in the menu. Then, select the top face of the left view. It should be now colored in red to state that it's currently selected. Finally, 
