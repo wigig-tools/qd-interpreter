@@ -313,18 +313,9 @@ def initializeOracle(useVisualizer=False):
                         help='Force the regeneration of the SLS phase results',
                         type=int, default=0)
 
-    # parser.add_argument('-u', nargs='?', action='store', dest='displayPlotWidget',
-    #                     help='decide to display plot widget or not")', type=int, default=0)
-
     parser.add_argument('--curves', dest='displayPlotWidget', action='store_true')
     parser.add_argument('--no-curves', dest='displayPlotWidget', action='store_false')
     parser.set_defaults(displayPlotWidget=False)
-
-    # parser.add_argument('-mimo', nargs='?', action='store', dest='mimo',
-    #                     help='Use MIMO")', type=int, default=0)
-
-    # parser.add_argument('-beamTracking', nargs='?', action='store', dest='beamTracking',
-    #                     help='BeamTracking Mode', type=int, default=0)
 
     parser.add_argument('--patternQuality', nargs='?', action='store', dest='patternQuality',
                         help='Granularity of the antenna patterns displayed',
@@ -335,10 +326,6 @@ def initializeOracle(useVisualizer=False):
     parser.add_argument('--sls', dest='slsEnabled', action='store_true')
     parser.add_argument('--no-sls', dest='slsEnabled', action='store_false')
     parser.set_defaults(slsEnabled=False)
-
-    # parser.add_argument('--beamTracking', dest='beamTracking', action='store_true')
-    # parser.add_argument('--no-beamTracking', dest='beamTracking', action='store_false')
-    # parser.set_defaults(beamTracking=False)
 
     parser.add_argument('--sensing', dest='sensing', action='store_true')
     parser.add_argument('--no-sensing', dest='sensing', action='store_false')
@@ -359,13 +346,17 @@ def initializeOracle(useVisualizer=False):
     parser.add_argument('--no-codebook', dest='codebookTabEnabled', action='store_false')
     parser.set_defaults(sensing=False)
 
-    parser.add_argument('--c', nargs='?', action='store', dest='codebookMode', choices=['dB', 'linear'],
+    parser.add_argument('--codebookMode', nargs='?', action='store', dest='codebookMode', choices=['dB', 'linear'],
                         help='Is the antenna pattern represented in dB or linear',
                         default='dB')
 
 
 
     argument = parser.parse_args()
+
+    if argument.patternQuality == 0:
+        # We are slicing antenna pattern so 0 cannot be used
+        argument.patternQuality = 1
 
     qdInterpreterConfig = QdInterpreterConfig(argument.scenarioName, argument.slsEnabled,argument.dataMode,argument.displayPlotWidget, argument.regenerateCachedQdRealData,
                                                           argument.forceSlsDataRegeneration,
@@ -494,8 +485,6 @@ def initializeOracle(useVisualizer=False):
                 logger.critical(
                     "Online Mode Activated but visualizer not used - Please change the mode used or activate the visualizer ")
                 exit()
-            # We need to load the Q-D files to allow the generation in the visualizer
-            # qdChannel = qdRealization.readJSONQdFile(nsFolder, qdFilesFolder, qdJSON,qdInterpreterConfig,qdScenario.nbNodes)
             preprocessedSlsData = None
             preprocessedAssociationData = None
             dataIndex = None
@@ -591,25 +580,25 @@ def initializeOracle(useVisualizer=False):
             qdScenario.nsMuMimoResults = nsInput.readNs3MuMimoResults(nsResultsFolder, muMimoInitiatorPrefix, muMimoResponderPRefix,
                                                           qdScenario)
             if qdScenario.nsMuMimoResults != None:
-                print("MU-MIMO Results: Available")
+                print("ns-3 MU-MIMO Results: Available")
             else:
-                print("MU-MIMO Results: Not Available")
-                if qdInterpreterConfig.mimoDataMode == "preprocessed":
-                    # Try to load the preprocessed MU-MIMO results
-                    muMimoPickledFile = os.path.join(nsResultsFolder, "muMimoResults.p")
-                    if os.path.exists(muMimoPickledFile):
-                        print("MU-MIMO preprocessed data already generated - Just load them")
-                        qdScenario.oracleMuMimoResults = pickle.load(open(muMimoPickledFile, "rb"))
-                    else:
-                        print("MU-MIMO preprocessed data do not exist - Generate them")
-                        # We are right now precomputing the MU-MIMO results just for one MIMO initiator
-                        # and with a MIMO group set to 1
-                        # TODO change this behavior if needed
-                        fakeInitiatorId = 0
-                        fakeGroupId = 1
-                        qdScenario.oracleMuMimoResults = preprocessCompleteMuMimo(fakeInitiatorId, fakeGroupId, qdChannel,
-                                                                                  qdScenario, txParam,
-                                                                                  nbSubBands, codebooks,muMimoPickledFile)
+                print("ns-3 MU-MIMO Results: Not Available")
+            if qdInterpreterConfig.mimoDataMode == "preprocessed":
+                # Try to load the preprocessed MU-MIMO results
+                muMimoPickledFile = os.path.join(nsResultsFolder, "muMimoResults.p")
+                if os.path.exists(muMimoPickledFile):
+                    print("MU-MIMO preprocessed data already generated - Just load them")
+                    qdScenario.oracleMuMimoResults = pickle.load(open(muMimoPickledFile, "rb"))
+                else:
+                    print("MU-MIMO preprocessed data do not exist - Generate them")
+                    # We are right now precomputing the MU-MIMO results just for one MIMO initiator
+                    # and with a MIMO group set to 1
+                    # TODO change this behavior if needed
+                    fakeInitiatorId = 0
+                    fakeGroupId = 1
+                    qdScenario.oracleMuMimoResults = preprocessCompleteMuMimo(fakeInitiatorId, fakeGroupId, qdChannel,
+                                                                              qdScenario, txParam,
+                                                                              nbSubBands, codebooks,muMimoPickledFile)
     else:
         # MIMO Not Enabled
         qdScenario.maxSupportedStreams = 0
@@ -648,10 +637,8 @@ def initializeOracle(useVisualizer=False):
             qdRealization.readJSONTargetMPCFile(scenarioQdVisualizerFolder, targetMpcJSON, qdScenario)
             qdRealization.readDoppler(scenarioQdVisualizerFolder,dopplerAxisFile,dopplerRangeFile)
 
-    if qdInterpreterConfig.dataMode != 'none':
-        return qdScenario, txParam, codebooks, environmentFile, maxReflectionOrder
-    else:
-        return qdScenario, None, codebooks, environmentFile, maxReflectionOrder
+
+    return qdScenario, txParam, codebooks, environmentFile, maxReflectionOrder
 
 def loadCodebookConfiguration(scenarioFolder):
     """Read the codebook configuration file if it exists

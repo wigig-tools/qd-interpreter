@@ -294,7 +294,7 @@ def performMuMimoSisoPhase(mode,mimoInitiatorId,nbPaaMimoInitiator, mimoResponde
                 mimoSisoResults[rxNode, mimoTxAntennaId] = (rxPowerSectorListRTXSS, snrListITXSS)
     return mimoSisoResults
 
-def getSuMimoTopKSnr(txId, nbPaaTx, mimoTxStreamCombinationsTxtoRx, mimoSisoResults, qdScenario, codebooks, topK=5):
+def getSuMimoTopKSnr(txId, nbPaaTx, mimoTxStreamCombinationsTxtoRx, mimoSisoResults, qdScenario, codebooks, topK):
     """
         Compute the top-k for SU-MIMO
 
@@ -370,7 +370,7 @@ def getSuMimoTopKSnr(txId, nbPaaTx, mimoTxStreamCombinationsTxtoRx, mimoSisoResu
         streamCombinationTested += 1
     return txTopKCandidatesTxtoRx, txTopKCandidatesTxtoRxTable
 
-def getMuMimoTopKSnr(mode, mimoInitiatorId, nbPaaMimoInitiator,nbSectorsPerPaaMimoInitiator, mimoTxStreamCombinationsItoR, sisoInitiatorToResponderList, topK=5):
+def getMuMimoTopKSnr(mode, mimoInitiatorId, nbPaaMimoInitiator,nbSectorsPerPaaMimoInitiator, mimoTxStreamCombinationsItoR, sisoInitiatorToResponderList, topK):
     """
         Compute the top-k for MU-MIMO
 
@@ -958,7 +958,7 @@ def performMuMimoBft(traceIndex,mimoInitiatorId,anglesInitiator, directivityInit
                                    )
 
 def computeSuMimoBft(mimoInitiatorId, mimoResponderId, traceIndex, qdScenario, qdProperties, txParam, nbSubBands,
-                     codebooks):
+                     codebooks, topK=20):
     """
        Compute SU-MIMO results between an initiator and a responder for a given trace
 
@@ -1011,7 +1011,7 @@ def computeSuMimoBft(mimoInitiatorId, mimoResponderId, traceIndex, qdScenario, q
     txTopKCandidatesItoR, txTopKCandidatesItoRTable = getSuMimoTopKSnr(mimoInitiatorId, nbPaaMimoInitiator,
                                                                  mimoTxStreamCombinationsItoR,
                                                                  mimoSisoResultsItoR,
-                                                                 qdScenario, codebooks)
+                                                                 qdScenario, codebooks,topK)
 
     # ############################################################
     # # ALL POSSIBLE INDIVIDUAL STREAM RESPONDER TO INITIATOR    #
@@ -1033,7 +1033,7 @@ def computeSuMimoBft(mimoInitiatorId, mimoResponderId, traceIndex, qdScenario, q
                                                                  nbPaaMimoResponder,
                                                                  mimoTxStreamCombinationsRtoI,
                                                                  mimoSisoResultsRtoI,
-                                                                 qdScenario, codebooks)
+                                                                 qdScenario, codebooks, topK)
 
 
 
@@ -1075,10 +1075,12 @@ def preprocessCompleteSuMimo(mimoInitiatorId, mimoResponderId, qdChannel, qdScen
     """
     print("The oracle will now compute all the SU-MIMO results for the pair Mimo Initiator:",mimoInitiatorId,"=> Mimo Responder:",mimoResponderId," - This process can be long")
     suMimoResults = {}
+    topK=200 # We set the top K to a higher value when preprocessed
     for traceIndex in range(qdScenario.nbTraces):
+        print("Trace:",traceIndex, " SU-MIMO BF computed - ", qdScenario.nbTraces-traceIndex, "traces remaining")
         # Iterate over all the traces for the pair and compute SU-MIMO results
         results = computeSuMimoBft(mimoInitiatorId, mimoResponderId,traceIndex,
-             qdScenario, qdChannel, txParam, nbSubBands, codebooks)
+             qdScenario, qdChannel, txParam, nbSubBands, codebooks, topK)
         suMimoResults[traceIndex,mimoInitiatorId,mimoResponderId] = results
 
     # Pickle the results
@@ -1086,7 +1088,7 @@ def preprocessCompleteSuMimo(mimoInitiatorId, mimoResponderId, qdChannel, qdScen
                  protocol=pickle.HIGHEST_PROTOCOL)
     return suMimoResults
 
-def computeMuMimoBft(mimoInitiatorId,mimoResponderIds,traceIndex,qdScenario, qdProperties, txParam, nbSubBands, codebooks):
+def computeMuMimoBft(mimoInitiatorId,mimoResponderIds,traceIndex,qdScenario, qdProperties, txParam, nbSubBands, codebooks, topK=20):
     """
        Compute MU-MIMO results between an initiator and responders for a given trace
 
@@ -1134,7 +1136,7 @@ def computeMuMimoBft(mimoInitiatorId,mimoResponderIds,traceIndex,qdScenario, qdP
     # Perform the SISO phase of MU-MIMO from initiator to responder
     sisoInitiatorToResponderList = performMuMimoSisoPhase("initiator",mimoInitiatorId,nbPaaMimoInitiator, mimoResponderIds, traceIndex, qdProperties, txParam,nbSubBands,qdScenario, codebooks)
     # Get the top-K from initiator to responder
-    txTopKCandidatesItoR,txTopKCandidatesItoRTable, streamIdItoRTable = getMuMimoTopKSnr("initiator", mimoInitiatorId, nbPaaMimoInitiator,nbSectorsPerPaaMimoInitiator, mimoTxStreamCombinationsItoR, sisoInitiatorToResponderList)
+    txTopKCandidatesItoR,txTopKCandidatesItoRTable, streamIdItoRTable = getMuMimoTopKSnr("initiator", mimoInitiatorId, nbPaaMimoInitiator,nbSectorsPerPaaMimoInitiator, mimoTxStreamCombinationsItoR, sisoInitiatorToResponderList, topK)
 
     ############################################################
     #                    RESPONDER PART                        #
@@ -1150,7 +1152,7 @@ def computeMuMimoBft(mimoInitiatorId,mimoResponderIds,traceIndex,qdScenario, qdP
                                                                                           nbPaaMimoInitiator,
                                                                                           nbSectorsPerPaaMimoResponder,
                                                                                           mimoTxStreamCombinationsRtoI,
-                                                                                          sisoResponderToInitiatorList)
+                                                                                          sisoResponderToInitiatorList, topK)
     results = performMuMimoBft(traceIndex,mimoInitiatorId,anglesInitiator,directivityInitiator, nbPaaMimoInitiator,streamIdItoRTable,txTopKCandidatesItoRTable,mimoResponderIds,rxTopKCandidatesRtoITable,anglesResponder,
                    directivityResponder, qdProperties, qdScenario, txParam, nbSubBands, codebooks)
 
@@ -1191,8 +1193,10 @@ def preprocessCompleteMuMimo(mimoInitiatorId, mimoGroupId, qdChannel, qdScenario
     # For now, we hardcode the MIMO Initiator and MIMO Responders
     mimoInitiatorId = 0
     mimoResponderIds = [1, 2]
+    topK = 200
     for traceIndex in range(qdScenario.nbTraces):
-        results = computeMuMimoBft(mimoInitiatorId,mimoResponderIds,traceIndex,qdScenario, qdScenario.qdChannel, txParam, 355, codebooks)
+        print("Trace:", traceIndex, " SU-MIMO BF computed - ", qdScenario.nbTraces - traceIndex, "traces remaining")
+        results = computeMuMimoBft(mimoInitiatorId,mimoResponderIds,traceIndex,qdScenario, qdScenario.qdChannel, txParam, 355, codebooks, topK)
         muMimoResults[traceIndex,mimoGroupId] = results
 
     pickle.dump(muMimoResults, open(muMimoPickledFile, "wb"),

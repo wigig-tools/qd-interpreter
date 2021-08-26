@@ -522,7 +522,7 @@ class Visualization(HasTraits):
     #########################################################
     #                  BEAMTRACKING                         #
     #########################################################
-    guiBeamtrackingType = Enum('Analog', 'Digital')
+    guiBeamtrackingType = Enum('Analog', 'Hybrid')
     if qdScenario.qdInterpreterConfig.mimo == "beamTracking":
         guiDisplayBeamTrackingParameters = Str("True")
     else:
@@ -896,8 +896,8 @@ class Visualization(HasTraits):
                     for pattern in self.mimoStreamPatterns["Analog", streamId]:
                         self.makeInvisible(pattern)
             for streamId in range(qdScenario.maxSupportedStreams + 1):
-                if ("Digital", streamId) in self.mimoStreamPatterns:
-                    for pattern in self.mimoStreamPatterns["Digital", streamId]:
+                if ("Hybrid", streamId) in self.mimoStreamPatterns:
+                    for pattern in self.mimoStreamPatterns["Hybrid", streamId]:
                         self.makeInvisible(pattern)
 
 
@@ -962,7 +962,12 @@ class Visualization(HasTraits):
         stasLabels = Labels()
         vtk_data_source = stasVisObj
         self.engine1.add_filter(stasLabels, vtk_data_source)
-        stasLabels.mapper.label_format = ("STA %d")
+
+        if not qdScenario.qdInterpreterConfig.sensing:
+            stasLabels.mapper.label_format = ("STA %d")
+        else:
+            # The sensing scenario do not really have STA, just change the label (TODO: find a better fix)
+            stasLabels.mapper.label_format = ("AP %d")
         stasLabels.mapper.label_mode = ('label_field_data')
         stasLabels.property.font_size = 18
 
@@ -2534,6 +2539,12 @@ class Visualization(HasTraits):
                 self.mpcTubesDicVisObj[tx, rx][reflectionOrder].filter.radius = self.mpcReflectionsProperties[
                     reflectionOrder].width
 
+        self.guiMpcColor = (self.mpcReflectionsProperties[self.guiMpcReflection].color[0] * 255,
+                            self.mpcReflectionsProperties[self.guiMpcReflection].color[1] * 255,
+                            self.mpcReflectionsProperties[self.guiMpcReflection].color[2] * 255)
+        self.guiMpcsMagnifier = self.mpcReflectionsProperties[self.guiMpcReflection].width
+        self.guiMpcsHidden = self.mpcReflectionsProperties[self.guiMpcReflection].hidden
+
     def updateSlsVisuals(self, txNode, rxNode, paaTx, paaRx):
         """Update the SLS visuals for tx/paaTx node to rx/paaRx node and conversely
         """
@@ -2784,27 +2795,27 @@ class Visualization(HasTraits):
 
         nbStream = qdScenario.beamTrackingResults.maxSupportedStream + 1
 
-        # Make the right streams (analog or digital) visible
+        # Make the right streams (analog or Hybrid) visible
         if mode == "Analog":
             for streamId in range(nbStream):
-                if ("Digital", streamId) in self.mimoStreamPatterns:
-                    # Analog Selected - Hide Digital
-                    self.makeInvisible(self.mimoStreamPatterns["Digital", streamId][0])
-                    self.makeInvisible(self.mimoStreamPatterns["Digital", streamId][1])
+                if ("Hybrid", streamId) in self.mimoStreamPatterns:
+                    # Analog Selected - Hide Hybrid
+                    self.makeInvisible(self.mimoStreamPatterns["Hybrid", streamId][0])
+                    self.makeInvisible(self.mimoStreamPatterns["Hybrid", streamId][1])
                 if ("Analog", streamId) in self.mimoStreamPatterns:
                     # Analog Selected - Show Analog
                     self.makeVisible(self.mimoStreamPatterns["Analog", streamId][0])
                     self.makeVisible(self.mimoStreamPatterns["Analog", streamId][1])
-        elif mode == "Digital":
+        elif mode == "Hybrid":
             for streamId in range(nbStream):
                 if ("Analog", streamId) in self.mimoStreamPatterns:
-                    # Digital Selected - Hide Analog
+                    # Hybrid Selected - Hide Analog
                     self.makeInvisible(self.mimoStreamPatterns["Analog", streamId][0])
                     self.makeInvisible(self.mimoStreamPatterns["Analog", streamId][1])
-                if ("Digital", streamId) in self.mimoStreamPatterns:
-                    # Digital Selected - Show Digital
-                    self.makeVisible(self.mimoStreamPatterns["Digital", streamId][0])
-                    self.makeVisible(self.mimoStreamPatterns["Digital", streamId][1])
+                if ("Hybrid", streamId) in self.mimoStreamPatterns:
+                    # Hybrid Selected - Show Hybrid
+                    self.makeVisible(self.mimoStreamPatterns["Hybrid", streamId][0])
+                    self.makeVisible(self.mimoStreamPatterns["Hybrid", streamId][1])
 
         # Get the PAAs IDs for the stream
         # Not used for beamtracking as the generation of the results are not consistent with the remaining of the framework
@@ -2826,8 +2837,8 @@ class Visualization(HasTraits):
         # Get the AWVs for the streams (Not used - Keep the code as a place holder)
         # txAwvs = qdScenario.getTxAwvAnalogBT(previousIndex) # Get the best Tx AWVs for each stream (not used)
         # rxAwvs = qdScenario.getRxAwvAnalogBT(previousIndex)  # Get the best Rx AWVs for each stream (not used)
-        if mode == "Digital":
-            # Digital
+        if mode == "Hybrid":
+            # Hybrid
             digitalCombiner = qdScenario.beamTrackingResults.digitalCombinerWeights
             digitalPrecoder = qdScenario.beamTrackingResults.digitalPrecoderWeights
             nbSpatialStreams = digitalCombiner.shape[1]
@@ -2843,7 +2854,7 @@ class Visualization(HasTraits):
                     weightRxSector.append(codebooks.geElementWeightsNode(qdScenario.getNodeType(mimoResponderId), rxSectorIds[i]))
                 weightTxSector = np.asarray(weightTxSector)
                 weightRxSector = np.asarray(weightRxSector)
-                # Compute the digital beamforming of a given stream by applying the digital beamforming to the analog beamforming
+                # Compute the Hybrid beamforming of a given stream by applying the digital beamforming to the analog beamforming
                 responderDigitalBf = digitalCombiner[traceIndex, :, n].conj().T
                 hybridBfResponder = np.matmul(responderDigitalBf, weightRxSector)
                 responderStreamHbf.append(hybridBfResponder)
@@ -2872,7 +2883,7 @@ class Visualization(HasTraits):
                 rxzAntennaPattern = rxzAntennaPattern[::filterPattern]
                 rxcolorAntennaPattern = rxcolorAntennaPattern[::filterPattern]
             else:
-                # digital
+                # Hybrid
                 txxAntennaPattern, txyAntennaPattern, txzAntennaPattern, txcolorAntennaPattern = codebook.computeHybridPattern(
                     codebooks, codebookMode, 0, initiatorStreamHbf[streamId],filterPattern)
                 rxxAntennaPattern, rxyAntennaPattern, rxzAntennaPattern, rxcolorAntennaPattern = codebook.computeHybridPattern(
@@ -4276,8 +4287,8 @@ class Visualization(HasTraits):
                         pattern.actor.actor.scale = (
                             self.guiMimoStreamSize, self.guiMimoStreamSize,
                             self.guiMimoStreamSize)
-                if ("Digital", self.guiMimoStream) in self.mimoStreamPatterns:
-                    for pattern in self.mimoStreamPatterns["Digital", self.guiMimoStream]:
+                if ("Hybrid", self.guiMimoStream) in self.mimoStreamPatterns:
+                    for pattern in self.mimoStreamPatterns["Hybrid", self.guiMimoStream]:
                         pattern.actor.actor.scale = (
                             self.guiMimoStreamSize, self.guiMimoStreamSize,
                             self.guiMimoStreamSize)
@@ -4303,8 +4314,8 @@ class Visualization(HasTraits):
 
                         pattern.actor.property.color = (
                             colorPicked[0] / 255, colorPicked[1] / 255, colorPicked[2] / 255)
-                if ("Digital", self.guiMimoStream) in self.mimoStreamPatterns:
-                    for pattern in self.mimoStreamPatterns["Digital", self.guiMimoStream]:
+                if ("Hybrid", self.guiMimoStream) in self.mimoStreamPatterns:
+                    for pattern in self.mimoStreamPatterns["Hybrid", self.guiMimoStream]:
                         pattern.actor.property.edge_color = colorConverted
                         pattern.actor.property.color = (
                             colorPicked[0] / 255, colorPicked[1] / 255, colorPicked[2] / 255)
@@ -4330,8 +4341,8 @@ class Visualization(HasTraits):
                 if ("Analog", self.guiMimoStream) in  self.mimoStreamPatterns:
                     for pattern in  self.mimoStreamPatterns["Analog", self.guiMimoStream]:
                         pattern.actor.property.line_width = self.guiMimoEdgesSize
-                if ("Digital", self.guiMimoStream) in  self.mimoStreamPatterns:
-                    for pattern in  self.mimoStreamPatterns["Digital", self.guiMimoStream]:
+                if ("Hybrid", self.guiMimoStream) in  self.mimoStreamPatterns:
+                    for pattern in  self.mimoStreamPatterns["Hybrid", self.guiMimoStream]:
                         pattern.actor.property.line_width = self.guiMimoEdgesSize
             # Keep the new selected edge size
             self.mimoStreamEdgeSize[self.guiMimoStream] = self.guiMimoEdgesSize
@@ -4650,12 +4661,14 @@ class Visualization(HasTraits):
         """
         if self.guiVisualizerInteractions == "play":
             # If the current action selected is play, iterate by object.guiTraceIncrement
+
             if (self.traceIndex + self.guiTraceIncrement <= qdScenario.nbTraces - 1):
                 self.traceIndex = self.traceIndex + self.guiTraceIncrement
                 self.animateOneStep()
-            else:
-                self.traceIndex = 0
-                self.animateOneStep()
+            # else:
+                # Code if we want to loop forever when play is pressed
+                # self.traceIndex = 0
+                # self.animateOneStep()
         elif self.guiVisualizerInteractions == "back":
             # If the current action selected is back, decrement by object.guiTraceIncrement
             if (self.traceIndex - self.guiTraceIncrement >= 0):
@@ -5158,22 +5171,22 @@ class Visualization(HasTraits):
                                     high_name='guiMaxTrace',
                                     mode='spinner',
                                     )),
-            Item('guiVisualizerInteractions', width=1, style='custom',show_label=False),
+            Item('guiVisualizerInteractions',  style='custom',show_label=False),
 
-            Item(name='guiTraceIncrement', width=1, label='PlaySpeed (Trace per animation)'),
+            Item(name='guiTraceIncrement',  label='PlaySpeed (Trace per animation)'),
             label='Scenario Interaction',
             show_border=True),
         VGroup(
-            Item(name='guiMimoStream', label='Stream', style='custom', height=-35, width=-500),
+            Item(name='guiMimoStream', label='Stream', style='custom'),
             HGroup(
-                Item(name='guiMimoStreamSize', label='Stream Size', height=-35, width=-500),
-                Item(name='guiMimoStreamMpcSize', label='Stream MPC Size', height=-35, width=-500),
-                Item(name='guiMimoEdgesSize', label='Edges Size', height=-35, width=-500),
-                Item(name='guiMimoStreamOpacity', label='Opacity', height=-35, width=-500),
+                Item(name='guiMimoStreamSize', label='Stream Size'),
+                Item(name='guiMimoStreamMpcSize', label='Stream MPC Size'),
+                Item(name='guiMimoEdgesSize', label='Edges Size'),
+                Item(name='guiMimoStreamOpacity', label='Opacity'),
             ),
 
             Item('guiMimoStreamColor', editor=ColorEditor(), label='Stream Color', style='custom'),
-            Item('guiButtonSaveMimoConfig', height=-35, width=-500),
+            Item('guiButtonSaveMimoConfig',show_label=False),
 
             label='Streams Visualization',
             show_border=True),
@@ -5355,7 +5368,7 @@ if __name__ == "__main__":
         rxPowerPlotItem.setLabel('left', 'Power (dBm)', **labelStyle)
         rxPowerPlotItem.setLabel('bottom', 'Trace', **labelStyle)
         rxPowerPlotItem.getAxis('left').setPen((255, 255, 255))
-        rxPowerPlotItem.setYRange(-80, 0, padding=0)
+        # rxPowerPlotItem.setYRange(-80, 0, padding=0)
         rxPowerPlotItem.showGrid(True, True)
         axisX = rxPowerPlotItem.getAxis('bottom')
         axisX.setTickSpacing(1000, 100)
@@ -5363,7 +5376,7 @@ if __name__ == "__main__":
         powerPerSectorWidget = pg.PlotWidget()
         Y_CURVE_LEGEND["Power Per Sector"] = powerPerSectorWidget.addLegend(offset=(80, 30))
         powerPerSectorPlotItem = powerPerSectorWidget.plotItem
-        powerPerSectorPlotItem.setYRange(-100, -40, padding=0)
+        # powerPerSectorPlotItem.setYRange(-100, -40, padding=0)
         powerPerSectorPlotItem.setLabel('left', 'Power (Dbm)', **labelStyle)
         powerPerSectorPlotItem.setLabel('bottom', 'Sector ID', **labelStyle)
         powerPerSectorPlotItem.showGrid(True, True)
@@ -5381,7 +5394,7 @@ if __name__ == "__main__":
             psdWidget = pg.PlotWidget()
             Y_CURVE_LEGEND["PSD"] = psdWidget.addLegend(offset=(80, 30))
             psdPlotItem = psdWidget.plotItem
-            psdPlotItem.setYRange(-120, -60, padding=0)
+            # psdPlotItem.setYRange(-120, -60, padding=0)
             psdPlotItem.setLabel('left', 'Power (Db)', **labelStyle)
             psdPlotItem.setLabel('bottom', 'Subband', **labelStyle)
             psdPlotItem.showAxis('right')
