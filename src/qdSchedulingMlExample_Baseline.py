@@ -29,37 +29,15 @@ import numpy as np
 import os
 
 if __name__ == "__main__":
-    qdScenario, preprocessedSlsData, preprocessedAssociationData, txParam, dataIndex, qdProperties, codebooks, environmentFile, maxReflectionOrder,suMimoResults, maxSupportedStreams, mimoResults = globals.initializeOracle()  # We don't want to use the visualizer
-
-    # To uncomment if interested into computing scheduling and capacity
-    # allAssociationModes = [scheduler.StaAssociationMode.BEST_AP,scheduler.StaAssociationMode.SAME_AP]
-    # for associationMode in allAssociationModes:
-    #     from itertools import combinations
-    #     # Get the list of all STAs ID
-    #     staIdsList = np.arange(qdScenario.nbAps, qdScenario.nbNodes)
-    #     for nbSample in range(qdScenario.nbStas, qdScenario.nbStas + 1):
-    #         allCombinations = list(
-    #             combinations(staIdsList, nbSample))  # Find all the STA ID combinations nCr for nbSample sample
-    #         for staIdToConsider in allCombinations:
-    #             if nbSample == qdScenario.nbStas:
-    #                 folderPrefix = os.path.join(associationMode.value, "AllSTAs")
-    #                 if not os.path.exists(folderPrefix):
-    #                     os.makedirs(folderPrefix)
-    #             else:
-    #                 folderPrefix = str(nbSample) + "STAs"
-    #                 for name in staIdToConsider:
-    #                     folderPrefix += ("_" + str(name))
-    #                 folderPrefix = os.path.join(associationMode.value, folderPrefix)
-    #                 if not os.path.exists(folderPrefix):
-    #                     os.makedirs(folderPrefix)
-    #             scheduler.computeDataTransmission(qdScenario,associationMode,staIdToConsider,folderPrefix,preprocessedSlsData,preprocessedAssociationData,txParam,dataIndex)
+    # qdScenario, preprocessedSlsData, preprocessedAssociationData, txParam, dataIndex, qdProperties, codebooks, environmentFile, maxReflectionOrder,suMimoResults, maxSupportedStreams, mimoResults = globals.initializeOracle()  # We don't want to use the visualizer
+    qdScenario, txParam, codebooks, environmentFile, maxReflectionOrder = globals.initializeOracle()
 
     # Machine-Learning Beamforming-Training
     # Use coordinates and rotations
     # uses default modelType='Baseline'
     # ml.topKSls(qdScenario, codebooks, preprocessedSlsData.powerPerSectorList, dataIndex,
     #            ml.CommunicationMode.AP_TO_STAS, ml.InputToUse.COORDINATES_ROTATIONS)
-    ml.topKSls(qdScenario, codebooks, preprocessedSlsData.powerPerSectorList, dataIndex,
+    ml.topKSls(qdScenario, codebooks, qdScenario.preprocessedSlsData.powerPerSectorList, qdScenario.dataIndex,
                ml.CommunicationMode.STAS_TO_AP, ml.InputToUse.COORDINATES_ROTATIONS)
     # ml.topKSls(qdScenario, codebooks, preprocessedSlsData.powerPerSectorList, dataIndex,
     #            ml.CommunicationMode.STAS_TO_STA, ml.InputToUse.COORDINATES_ROTATIONS,

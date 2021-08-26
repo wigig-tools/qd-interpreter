@@ -66,8 +66,8 @@ def createStasAssociation(qdScenario,associationMode, staIds, preprocessedAssoci
         Contains the ID of the STAs connected to an AP
     """
     apConnectedStas = {}
-    print("Create STAs association to APs for all the traces")
-    globals.printProgressBarWithoutETA(0, qdScenario.nbTraces, prefix='Progress:', suffix='Complete', length=50)
+    print("\tCreate STAs association to APs for all the traces")
+    globals.printProgressBarWithoutETA(0, qdScenario.nbTraces, prefix='\tProgress:', suffix='Complete', length=50)
     for traceIndex in range(qdScenario.nbTraces):
         # Iterate over all the traces
         for i in staIds:
@@ -86,7 +86,7 @@ def createStasAssociation(qdScenario,associationMode, staIds, preprocessedAssoci
             else:
                 # Add the id of the STA to the dictionary holding the STA connected to each AP
                 apConnectedStas[(idApStaAssociated, traceIndex)].append(i)
-        globals.printProgressBarWithoutETA(traceIndex + 1, qdScenario.nbTraces, prefix='Progress:', suffix='Complete',
+        globals.printProgressBarWithoutETA(traceIndex + 1, qdScenario.nbTraces, prefix='\tProgress:', suffix='Complete',
                                            length=50)
     return apConnectedStas
 
@@ -168,7 +168,7 @@ def createDownlinkScheduling(qdScenario,apConnectedStas, folderPrefix):
         schedulingDic[idAp] = (transmissionIntervals, idStaDownlink, traceList)
         idStaDownlink = idStaDownlink.reshape(len(idApDownlink) - 1, len(transmissionIntervals))
         c = ax.pcolormesh(transmissionIntervals, idApDownlink, idStaDownlink, cmap='gnuplot2', vmin=qdScenario.nbAps,
-                          vmax=qdScenario.nbNodes)
+                          vmax=qdScenario.nbNodes, shading='auto')
 
     # Create a visualization for the downlink scheduling (svg format)
     bounds = np.arange(qdScenario.nbAps, qdScenario.nbNodes + 1)
@@ -245,6 +245,7 @@ def transmitData(qdScenario,schedulingDic, nbStasConnectedToAps, associationMode
     ###################################
     #     INTERFERENCE COMPUTATION     #
     ###################################
+
     for apId in range(qdScenario.nbAps):
         # Iterate over each AP to compute the SNR and SINR of its downlink transmissions (taking into account other potential interfering AP transmissions)
         snrDownlinkTx = []
@@ -269,7 +270,8 @@ def transmitData(qdScenario,schedulingDic, nbStasConnectedToAps, associationMode
         # Create file to save the capacity for the current AP
         f = open(os.path.join(destinationPath, "AP" + str(apId) + ".csv"), "w")
         f.write("TRACE,AP,STA,SINR(dB),Capacity(Mbps),NBSTAFORAP,TRANSMISSIONTIMESTEP\n")
-        globals.printProgressBarWithoutETA(0, len(apTransmissionsTimeSteps) - 1, prefix='Progress:', suffix='Complete',
+        print("\tCompute Data Transmission for AP:",apId)
+        globals.printProgressBarWithoutETA(0, len(apTransmissionsTimeSteps) - 1, prefix='\tProgress:', suffix='Complete',
                                            length=50)
         for indexTimeStep in range(len(apTransmissionsTimeSteps) - 1):
             # Go over every downlink allocations allocated for a given transmitting AP
@@ -477,7 +479,7 @@ def transmitData(qdScenario,schedulingDic, nbStasConnectedToAps, associationMode
                     apTransmissionsTimeSteps[indexTimeStep]) + "-" + str(
                     apTransmissionsTimeSteps[indexTimeStep + 1]) + "\n")
             globals.printProgressBarWithoutETA(indexTimeStep + 1, len(apTransmissionsTimeSteps) - 1,
-                                               prefix='Progress:', suffix='Complete',
+                                               prefix='\tProgress:', suffix='Complete',
                                                length=50)
         # Plot for a given downlink AP transmission
         ##########################
@@ -561,10 +563,8 @@ def computeDataTransmission(qdScenario,associationMode, staIds, folderPrefix, pr
     dataIndex: Dic
         Used to reconstruct the index of the preprocessed data
     """
+    print("Scheduler association mode:", associationMode)
     apConnectedStas = createStasAssociation(qdScenario,associationMode, staIds, preprocessedAssociationData)
-    print("************************************************")
-    print("*      ASSOCIATION CONFIGURATION SUMMARY       *")
-    print("************************************************")
     schedulingDic, nbStasConnectedToAps = createDownlinkScheduling(qdScenario,apConnectedStas,
                                                                    folderPrefix)  # Define the transmission (Works only for downlink, i.e, AP to STA)
     transmitData(qdScenario,schedulingDic, nbStasConnectedToAps, associationMode, folderPrefix, preprocessedSlsData, txParam,

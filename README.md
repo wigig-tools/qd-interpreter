@@ -296,6 +296,8 @@ The NIST Q-D Interpreter allows to visualize:
 
 **It is worth worth mentionning that the Oracle MIMO results are still in beta and needs to be validated versus the ns-3 MIMO implementation. The algorithm used for both ns-3 and oracle MIMO BT is inspired from the top K joint SNR described [here](https://arxiv.org/ftp/arxiv/papers/1703/1703.05650.pdf). More information about the algorithm can be found in this [article](https://dl.acm.org/doi/abs/10.1145/3460797.3460799). However, both (ns-3 and oracle) `top K` algorithm implementations has been performed independently. A cross-validation phase will be conducted to investigate the inconsistencies of the results between the oracle mode and ns-3.**
 
+For more information about MIMO visualization configuration, please refer to section TODO
+
 ## SU-MIMO 
 For SU-MIMO BT results, we will use the scenario `suMimo2x2d3cm`. 
 This scenario is made of one AP and one STA. Both of them are equipped with 2 PAAs, and each antenna is separated by 3cm along the Y-axis as displayed in the picture below. 
@@ -331,6 +333,7 @@ The color of the stream `0` is set to red as displayed in the GUI in the field `
 <img src="docs/img/suMimoMPCs.png" alt="drawing" width=500>
 
 If you want to switch stream (either to change the appearance of the stream or to know which Tx/Rx PAA/Sectors it is using), click on the stream that you want to select using the `Stream` field in the GUI. 
+
 
 The video below shows the complete results of the ns-3 SU-MIMO BT for all the traces. 
 
@@ -507,6 +510,23 @@ The video below shows the SU-MIMO beamtracking results for the first 50 traces o
 
 You can observe that it is slower to render hybrid beamtracking results. It is expected as for every trace, the resulting hybrid beam pattern must be computed in the visualizer. 
 
+
+## Customize MIMO visualization
+
+The MIMO visualization can be customized and in particular for a selected stream:
+* The size of the transmitter/receiver antenna patterns
+* The MPCs size
+* The edges size
+* The opacity of the transmitter/receiver patterns
+* The color of the selected stream antenna patterns and MPCs
+
+To customize the view, open either `suMimo`, `muMimo` or `beamTracking` tab in the GUI depending on the MIMO mode you are using.
+Then, select the stream that you want to configure using the `Stream` field. The selected stream antenna patterns size can be adjusted using `Stream Size` field. The selected stream MPCs size can be changed using `Stream MPC size` field. The selected stream edges size can e adjusted using `Edges size` field. The selected stream opacity can be changed using `Opacity` field. Finally, the MPCs and antenna patterns colors can be changed using the `Stream Color` field. 
+
+The picture below show a configuration done to put the emphasis on the stream `0` in SU-MIMO case.
+
+<img src="docs/img/changeMIMOvisual.png" alt="drawing">
+
 # Sensing visualization
 
 We recently started to extend the NIST Q-D framework to create an Integrated Sensing and Communication (ISAC) framework (see these two contributions: contribution 1 contribution 2).
@@ -552,6 +572,112 @@ To iterate through the traces, it works as presented previously. However, channe
 <img src="docs/img/sensingChangeSpeed.png" alt="drawing">
 
 You can know press the `play` icon and observe the sensing scenario as displayed below. 
+
+# More about the Oracle mode: STAs association, scheduler, and Machine-Learning
+
+The oracle mode brings some additional features that will be described in this section. To do so, we will use the `VRArena` scenario.
+This scenario is made of 6 static APs and 6 STAs that are both moving and rotating. The number of traces is 1000 and represent a subset of the 30,000 traces used in this [article](https://ieeexplore.ieee.org/abstract/document/9443328). Please note that the codebook is made of 54 sectors and that it's backbaffled. 
+
+## Visualize STAs associations
+
+To launch the scenario, excute the following command:
+`python qdVisualizer.py --s VRArena --sls --dataMode preprocessed`
+
+Please note that the generation of the `preprocessed` data will take some time. 
+
+Once the visualizer is launched, click on the `Display STAs association` checkbox as displayed below.
+
+<img src="docs/img/VRShowAssoc.png" alt="drawing">
+
+Now, each STA is having a colored 3D transparent sphere surrounding it. The colored sphere is having the color of the AP to whom the STA is associated. The association is decided based on the AP that provides the best received power after the SLS phase (and this for every trace).
+
+The video below shows all traces and the evolution of the association. Please note that first, we setup the `playspeed` to 20. Then, `STA9` is the only STA that changes AP to which it is associated (the association sphere goes from light blue, i.e., associated to AP2, to darker blue, associated to AP1).
+
+<img src="docs/gif/VRShowAssoc.gif" alt="drawing" width=400>
+
+
+Now, if you select as a `Tx Node` a STA, and as a `Rx node` an AP, a new option is appearing: `Show Best AP for STA`. In this mode, the visualizer will not show the SLS results from the selected transmitter (which must be a STA) to the selected receiver (which must be an AP), but from the selected transmitter to the AP to whom it is associated.
+
+The video below shows the SLS results when STA9 is selected. We can clearly see that the SLS results are displayed from STA9 to the AP to whom it is associated. 
+
+<img src="docs/gif/VRShowSLSBestAp.gif" alt="drawing">
+
+
+## Additional information generated when `preprocessed` mode is used
+
+The `preprocessed` mode generate extra-information when used. For example, for the `VRArena` scenario, it generates a `graph` folder (located in `src\VRArena\Graph` folder). This folder contains three additional folder: `Association`, `Mobility`, and `SLS`.
+
+`Association` folder contains for each AP and for all traces the location of the STAs associated to it (upper part of the graph), as well as the density location map of the STAs associated. The picture below shows this graph for `AP0`. 
+
+<img src="docs/img/staAssociatedToAP0.png" alt="drawing" width=500>
+
+`Mobility` folder contains two files: `AllStasHexBinHeatmap.pdf` and `STAsMobility.pdf`. 
+
+`AllStasHexBinHeatmap.pdf` contains the density map of all the STAs for all the traces of the scenario and can be seen below.
+
+<img src="docs/img/AllStasHexBinHeatmap.png" alt="drawing" width=500>
+
+`STAsMobility.pdf`contains the mobility information for APs and STAs and can be seen below. 
+
+<img src="docs/img/STAsMobility.png" alt="drawing" width=500>
+
+Finally, `SLS` folder is made of two subfolders: `BestSectorITXSS` and `RxPowerITXSS`. 
+
+`BestSectorITXSS` contains the best sectors determined during the SLS BT for every traces and for every pair of nodes in the network.
+
+`BestSectorITXSS` contains the receiver power for every trace between every pair of node in the network. The sector used for the transmission is the one determined by the SLS BT. 
+
+## Oracle and scheduling
+
+For the need of this article, we developped a minimal scheduler. The scheduler operates by computing the downlink link (from the APs to the STAs).
+The scheduler is simple and allocate for each node associated to a given AP, a total duration of `t = timeSlot/nbStasAssociated`.
+The timeslot is the duration of a trace, which is set to 4ms in the `VRArena` scenario. The total number of associated depends of the association mode. We defined two different mode:
+* **Same AP**: At the first trace of the simulation, the STA associates to the best AP (in term of received power) and stay associated to it until the end of the simulation
+* **Best AP**: At each trace, the STA associates to the AP that gives it the best received power. 
+
+The scheduler is implemented in `qdSchedulingExample.py` that can be found in the `src` folder. 
+
+To execute it, use the following command:
+`python qdSchedulingExample.py --s VRArena --sls --dataMode preprocessed`
+
+This program will compute all the downlink transmissions using the two association modes. Once done, it creates two new folders in the `Graph` folder: `AssocBestAP` and `AssocSameAP`. 
+
+Each of this folder contains one subfolder `AllSTAs`. This subfolder is made of four subfolders: `Association`, `Capacity`, `Scheduling` and `SNR_SINR`. 
+
+`Association` contains one graph per AP showing for all the traces the number of STAs associated to the AP.
+
+`Capacity` contains the theoritical downlink capacity for each AP for all the traces. 
+
+`Scheduling` contains a graphical representation of the scheduled downlink transmission.
+
+`SNR_SINR` contains the evolution of the SNR and SINR for each AP for all the traces. 
+
+## Oracle and Machine-Learning
+
+Machine-Learning can help to reduce the overhead due to the SLS phase. Indeed, performing an exhaustive sector combination search can produce a lot of overhead. 
+We implemented a preliminary ML scheme to try to predict the sectors combination to test instead of performing an exhaustive search. 
+
+This ML scheme can be used for the following:
+* Predict the transmit sectors to use for the BT from AP0 to all STAs
+* Predict the transmit sectors to use for the BT from all STAs to AP0 
+* Predict the transmit sectors to use for the BT from all STAs minus STA 11 to STA11 
+
+These 3 uses-cases are designed due to the mobility of the nodes. The APs remain static so it is easier to infer a relationship for the transmit sector from the APs to the STAs. The STAs are not only moving but rotating so it's harder to predict the transmit sector to use from the STAs to the APs. The most challenging case is from a STA to another STA as both are moving and rotating.
+
+We implemented three flavors of the ML scheme regarding to the input data. One can use either:
+* the STAs coordinates
+* the STAs rotation information
+* the STAs coordinates + rotation information
+
+INFORMATION ABOUT INSTALL
+To launch the ML example, execute the following command:
+`python qdMlExample.py --s VRArena --sls --dataMode preprocessed`
+
+Once the simulation is over, a new `MachineLearning` folder is created in the `Graph` folder. It contains an `SLS` subfolder that is made of three subfolder: `Coordinates`, `Rotations`, and `CoordinatesAndRotations`. 
+
+Each of these folders contains a graph for each mode (APtoSTAs, STAs to APs and STA to STA) as well as a `.csv` file with a summary of the results. 
+
+Please note that the `VRArena` scenario contains only the first 1000 traces of 30,000 traces used in this [article](https://ieeexplore.ieee.org/abstract/document/9443328). The first 1000 traces contains the start of the measurements and at such does not exhibit a lot of mobility. If you are interested to obtain the entire dataset, just contact us. 
 
 
 # MISC
@@ -712,9 +838,7 @@ Now, select the `Visualization Tweak` tab in the GUI and click on `Display 3D Ob
 <img src="docs/img/LROOMChanged3DModel.png" alt="drawing" width=500>
 
 TODO
-* Change Antenna Pattern properties
-* Display STA association
-* Remove ML
+* Orientation
 
 
 ## Features:

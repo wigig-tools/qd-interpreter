@@ -381,6 +381,9 @@ class Visualization(HasTraits):
     guiMinSlsBftId = 0
     guiMaxSlsBftId = Int()
 
+
+
+
     if qdScenario.qdInterpreterConfig.slsEnabled:
         guiDisplayGroupSls = Str("True")
         guiDisplaySls = Bool(True)
@@ -3585,10 +3588,11 @@ class Visualization(HasTraits):
         if self.guiSlsMode == "Oracle":
             # We can only know the AP the STA is associated if using the Oracle
 
-            if qdScenario.qdInterpreterConfig.dataMode == 'online' and qdScenario.qdInterpreterConfig.plotData == 0:
+            if qdScenario.qdInterpreterConfig.dataMode == 'online' and not qdScenario.qdInterpreterConfig.plotData:
                 # If using online mode and not displaying the plots, we just compute for the Tx/Rx pair selected
                 # so it would be impossible to know to which AP the STA should be associated
                 print("STA association cannot be displayed when using online mode and plotData set to 0")
+
                 return
             colorCode = []  # We will color the sphere around the STA with the color of the APs
             for i in range(qdScenario.nbAps, qdScenario.nbNodes):
@@ -4085,11 +4089,17 @@ class Visualization(HasTraits):
         """Display or hide the STA association information
         """
         if self.guiSlsMode == "Oracle":
-            if self.guiDisplayStaAssociation:
-                self.makeVisible(self.stasAssociationVisObj)
-                self.displayStasAssociation(int(self.traceIndex))
+            if (qdScenario.qdInterpreterConfig.dataMode == "preprocessed") or (qdScenario.qdInterpreterConfig.dataMode == "online" and qdScenario.qdInterpreterConfig.plotData):
+                if self.guiDisplayStaAssociation:
+                    self.makeVisible(self.stasAssociationVisObj)
+                    self.displayStasAssociation(int(self.traceIndex))
+                else:
+                    self.makeInvisible(self.stasAssociationVisObj)
             else:
-                self.makeInvisible(self.stasAssociationVisObj)
+                globals.logger.warning(
+                    "STA association can only be displayed if dataMode set to online if the --curves option is used")
+
+
         else:
             self.makeInvisible(self.stasAssociationVisObj)
         self.forceRender()
@@ -4914,6 +4924,7 @@ class Visualization(HasTraits):
             show_border=True),
         resultsGUI,
         VGroup(
+
             Item(name='guiDisplayStaAssociation', width=-200, label='Display STAs Association'),
             Item(name='guiShowSlsBestAp', label='Show Best AP for STA',
                  visible_when='guiTxssTxRxTxType == "(STA)" and guiTxssRxTxTxType == "(AP)"'),
