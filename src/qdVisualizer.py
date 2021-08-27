@@ -3964,22 +3964,22 @@ class Visualization(HasTraits):
         self.stasVisObj.scene = scene
 
         # Update the 3D model as well
-        for apId in range(qdScenario.nbAps):
-            if self.apTextureMode == "none" or self.apTextureMode == "jpg":
-                self.apModelVisObj[apId].scene = scene
-            else:
-                # Each AP object is made of individual textures objects - Iterate through all of them
-                for individualObject in self.apModelVisObj[apId]:
-                    individualObject.scene = scene
+        # for apId in range(qdScenario.nbAps):
+        #     if self.apTextureMode == "none" or self.apTextureMode == "jpg":
+        #         self.apModelVisObj[apId].scene = scene
+        #     else:
+        #         # Each AP object is made of individual textures objects - Iterate through all of them
+        #         for individualObject in self.apModelVisObj[apId]:
+        #             individualObject.scene = scene
 
         # Display object associated to STA
-        for staId in range(qdScenario.nbAps, qdScenario.nbNodes):
-            if self.staTextureMode == "none" or self.staTextureMode == "jpg":
-                self.staModelVisObj[staId - qdScenario.nbAps].scene = scene
-            else:
-                # Each STA object is made of individual textures objects - Iterate through all of them
-                for individualObject in self.staModelVisObj[staId - qdScenario.nbAps]:
-                    individualObject.scene = scene
+        # for staId in range(qdScenario.nbAps, qdScenario.nbNodes):
+        #     if self.staTextureMode == "none" or self.staTextureMode == "jpg":
+        #         self.staModelVisObj[staId - qdScenario.nbAps].scene = scene
+        #     else:
+        #         # Each STA object is made of individual textures objects - Iterate through all of them
+        #         for individualObject in self.staModelVisObj[staId - qdScenario.nbAps]:
+        #             individualObject.scene = scene
         self.forceRender()
 
     @on_trait_change('guiNodesLabelsScene')

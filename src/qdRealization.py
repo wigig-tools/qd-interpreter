@@ -547,7 +547,7 @@ def readQdConfiguration(qdRealizationInputFolder, qdConfigurationFile):
         print("\n")
         return nbNodes, timeDivision, (totalTime / timeDivision), environmentFile, maxReflectionOrder
     except FileNotFoundError:
-        globals.logger.critical("Q-D configuration file: " + fileName + " does not exist - Exit")
+        globals.logger.critical("Q-D configuration file: " + fileName + " does not exist - Please check that the scenario you want to launch exists - Exiting Q-D Interpreter")
         exit()
 
 
