@@ -62,13 +62,13 @@ elevationCardinality = 181
 scenarioFolder = ""  # The folder containing all the files needed to display a given scenario
 scenarioPath = ""
 configFile = "config.csv"  # The file containing the parameters of the scenario
-nodePositionFolder = "NodePositions/"  # The folder containing the nodes positions
-mpcFolder = "MpcCoordinates/"  # Folder that contains the MPC coordinates files
+nodePositionFolder = "NodePositions"  # The folder containing the nodes positions
+mpcFolder = "MpcCoordinates"  # Folder that contains the MPC coordinates files
 qdRealizationOutputFolder = "Output"
 qdRealizationInputFolder = "Input"
 qdRealizationVisualizerFolder = "Visualizer"  # Folder exported by the Q-D realization software to store visualizer files
 qdRealizationNsFolder = "Ns3"  # Folder exported by the Q-D realization software to store ns-3 files
-topologyFolder = "RoomCoordinates/"  # The folder containing the file defining the environment geometry
+topologyFolder = "RoomCoordinates"  # The folder containing the file defining the environment geometry
 topologyFilename = "RoomCoordinates.csv"  # The environment geometry file
 resultsFolder = "Results"  # Folder containing the results files (Throughput, SLS, etc.)
 beamTrackingFolder = "BeamTracking"
@@ -78,7 +78,7 @@ preprocessedFolder = "Preprocessed"
 associationFolder = "Association"
 slsResultsFile = "slsDMG_MCS1.csv"  # The file containing the SLS phase results # TODO Update FileName
 snrFile = "snrDMG_MCS1.csv"  # The SNR file f(L-ROOM scenario only)
-CodebookFolder = "Codebook/"  # Folder containing the different codebook files
+CodebookFolder = "Codebook"  # Folder containing the different codebook files
 graphFolder = "Graph"
 schedulingFolder = "Scheduling"
 mlFolder = "MachineLearning"
@@ -420,6 +420,9 @@ def initializeOracle(useVisualizer=False):
         if qdInterpreterConfig.mimo == "beamTracking":
             beamTrackingCodebook = True
         codebooks = loadCodebook(CodebookFolder, beamTrackingCodebook, qdInterpreterConfig.codebookMode, codebookApName, codebookStaName)
+        folderCodebook = os.path.join(CodebookFolder,pickleFolder)
+        if not os.path.exists(folderCodebook):
+            os.makedirs(folderCodebook)
         pickle.dump(codebooks, open(cachedCodebooksFile, "wb"), protocol=pickle.HIGHEST_PROTOCOL)
 
 

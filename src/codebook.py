@@ -28,6 +28,7 @@ import threading
 import numpy as np
 import pandas as pd
 import globals
+import os
 
 
 # TODO Probably Move Somewhere else
@@ -452,9 +453,9 @@ def loadCodebook(CodebookFolder,beamTracking, codebookMode, apFileName=None, sta
     path = CodebookFolder
     codebookObject = Codebooks()
     if apFileName is not None:
-        apdf = pd.read_csv(path + apFileName, sep='\t', header=None, names=['data'])
+        apdf = pd.read_csv(os.path.join(path,apFileName), sep='\t', header=None, names=['data'])
     if staFileName is not None:
-        stadf = pd.read_csv(path + staFileName, sep='\t', header=None, names=['data'])
+        stadf = pd.read_csv(os.path.join(path,staFileName), sep='\t', header=None, names=['data'])
 
     if apFileName is not None and staFileName is not None:
         if apdf.equals(stadf):
@@ -919,7 +920,8 @@ def computeDirectivityAzimuthElevation(azimuth, elevation, singleElementDirectiv
     directivity[...] = np.multiply(directivity, singleElementDirectivity)
 
     radiationPattern = directivity.copy()
-    linear = False
+    radiationPattern[radiationPattern == 0] = 0.0000001
+
     if codebookMode == 'linear':
         radiationPattern = np.abs(radiationPattern) ** 2
     else:

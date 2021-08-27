@@ -255,7 +255,7 @@ def readNs3Configuration(scenarioFolder, nodesConfigurationFile, qdScenario):
         print("ns-3 configuration file in the scenario folder - Filter the nodes")
     except OSError as e:
         print(
-            "No ns-3 configuration file - Default Node Allocation (First node is an AP, all the others are STAs")
+            "No ns-3 configuration file - Default Node Allocation (First node is an AP, all the others are STAs)")
         # In case no ns-3 configuration files are provided, the strategy used is to:
         # - Allocate the first node as an AP
         # - Allocate all the other nodes as STA
