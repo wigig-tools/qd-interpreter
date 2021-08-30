@@ -5099,8 +5099,7 @@ class Visualization(HasTraits):
 
                     ),
                     VGroup(
-                        Item('guiObjectColor', editor=ColorEditor(),  label='Object Color', style='custom',
-                             full_size=False),
+                        Item('guiObjectColor', editor=ColorEditor(),  label='Object Color', style='custom'),
                         HGroup(
                             Item('guiVisualizerTextures', label='texture', style='simple'),
                             Item(name='guiTextureMode', label='Interpolation'),

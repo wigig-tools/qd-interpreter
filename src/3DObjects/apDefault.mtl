@@ -10,7 +10,7 @@ Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd \\blue.jpg
+map_Kd blue.jpg
 
 newmtl Material.002
 Ns 225.000000
@@ -21,7 +21,7 @@ Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd \\grey.jpg
+map_Kd grey.jpg
 
 newmtl Material.003
 Ns 225.000000
@@ -32,7 +32,7 @@ Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd \\grey.jpg
+map_Kd grey.jpg
 
 newmtl Material.004
 Ns 225.000000
@@ -43,7 +43,7 @@ Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd \\grey.jpg
+map_Kd grey.jpg
 
 newmtl Material.005
 Ns 225.000000
@@ -54,7 +54,7 @@ Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd \\grey.jpg
+map_Kd grey.jpg
 
 newmtl Material.006
 Ns 225.000000
@@ -65,7 +65,7 @@ Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd \\grey.jpg
+map_Kd grey.jpg
 
 newmtl Material.009
 Ns 225.000000
@@ -76,7 +76,7 @@ Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd \\grey.jpg
+map_Kd grey.jpg
 
 newmtl Material.018
 Ns 225.000000
@@ -87,7 +87,7 @@ Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd \\green.jpg
+map_Kd green.jpg
 
 newmtl Material.019
 Ns 225.000000
@@ -98,7 +98,7 @@ Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd \\black.jpg
+map_Kd black.jpg
 
 newmtl Material.020
 Ns 225.000000
@@ -109,7 +109,7 @@ Ke 1.000000 1.000000 1.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd \\red.jpg
+map_Kd red.jpg
 
 newmtl None.002
 Ns 500.000001
