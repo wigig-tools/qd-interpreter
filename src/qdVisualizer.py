@@ -5475,7 +5475,6 @@ if __name__ == "__main__":
 
         splitter.addWidget(qtabWidget)
 
-    container.show()
     window = QtGui.QMainWindow()
     window.setCentralWidget(container)
     window.setWindowTitle("Q-D Interpreter Visualizer")
