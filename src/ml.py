@@ -141,7 +141,7 @@ def getGroundTruthValues(qdScenario, codebooks, communicationMode, dataIndex, ta
                 # Iterate over all the traces of the simulation
                 # We get the power for every tx sector for a given trace for targetApId to staId transmission and convert it from dBm to W
                 index = dataIndex[(targetApId, staId, 0, 0,
-                                   traceId)]  # Get the index for the slsRxPower TODO The 0,0 should be the paaTx,paaRx (not a problem for you Raied as we are not in MIMO case)
+                                   traceId)]  # Get the index for the slsRxPower TODO The 0,0 should be the paaTx,paaRx (not a problem until we use MIMO)
                 # Our default behavior is to return a power of -infinite when the communication between nodes is impossible
                 # Replace the -infinite values with large negative values to allow the training
                 slsRxPowerWithoutInfinite = np.nan_to_num(slsRxPower[index])
@@ -164,7 +164,7 @@ def getGroundTruthValues(qdScenario, codebooks, communicationMode, dataIndex, ta
                 # Iterate over all the traces of the simulation
                 # We get the power for every tx sector for a given trace for staId to targetApId transmission and convert it from dBm to W
                 index = dataIndex[(staId, targetApId, 0, 0,
-                                   traceId)]  # Get the index for the slsRxPower TODO The 0,0 should be the paaTx,paaRx (not a problem for you Raied as we are not in MIMO case)
+                                   traceId)]  # Get the index for the slsRxPower TODO The 0,0 should be the paaTx,paaRx (not a problem as we are not in MIMO case)
 
                 # Our default behavior is to return a power of -infinite when the communication between nodes is impossible
                 # Replace the -infinite values with negative large values to allow the training
@@ -190,7 +190,7 @@ def getGroundTruthValues(qdScenario, codebooks, communicationMode, dataIndex, ta
                     # We don't want to add the targetStaId to targetStaId data
                     break
                 index = dataIndex[(staId, targetStaId, 0, 0,
-                                   traceId)]  # Get the index for the slsRxPower TODO The 0,0 should be the paaTx,paaRx (not a problem for you Raied as we are not in MIMO case)
+                                   traceId)]  # Get the index for the slsRxPower TODO The 0,0 should be the paaTx,paaRx (not a problem as we are not in MIMO case)
                 # Our default behavior is to return a power of -infinite when the communication between nodes is impossible
                 # Replace the -infinite values with negative large values to allow the training
                 slsRxPowerWithoutInfinite = np.nan_to_num(slsRxPower[index])
@@ -321,8 +321,10 @@ def topKSls(qdScenario, codebooks, slsRxPower, dataIndex, communicationMode=Comm
                            top_50_accuracy, tf.keras.metrics.mean_squared_error])
 
     model.summary()
-    from tensorflow.keras.utils import plot_model
-    plot_model(model, to_file='model.pdf')
+
+
+    # from tensorflow.keras.utils import plot_model
+    # plot_model(model, to_file='model.pdf')
 
     hist = model.fit(X_coord_train, y_train,
                      validation_data=(X_coord_validation, y_validation), epochs=nbEpochs, batch_size=batch_size,
@@ -333,7 +335,6 @@ def topKSls(qdScenario, codebooks, slsRxPower, dataIndex, communicationMode=Comm
     print("Evaluate on test data for model:", modelType, " , input data type:", inputToUse.value,
           "and communication mode:", communicationMode.value)
     results = model.evaluate(X_coord_testing, y_testing, batch_size=batch_size)
-
     print("Test loss, Test accuracy, Test topk5, Test top10, Test topk50, Test MSE:", results)
     print("============================================================================================")
     # Plot and save the graphs
