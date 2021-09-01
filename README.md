@@ -28,40 +28,77 @@ This page is organized as follows:
 To install the visualizer, we recommend using anaconda. 
 To do so, you need first to install [Anaconda](https://www.anaconda.com/). 
 Please select the installation for Python version 3.7 or higher. 
-Once Anaconda is installed, open the Anaconda Prompt and use the following command:
 
-`conda create -n yourEnvName python=3.7 pyqt=5 `
 
-then:
 
-`conda activate yourEnvName `
+## Mayavi installation for Windows System
+For Windows-based system, execute the following command:
 
-Install Mayavi:
+`conda create -n yourEnvName python=3.7 pyqt=5`
+
+
+`pip install pyqt5`
 
 `conda install -c menpo mayavi`
 
-Install pyqtgraph:
+`pip install mayavi`
+
+You can check that Mayavi is correctly installed using the following command:
+
+`mayavi2`
+
+Mayavi should be launched as displayed below.
+
+<img src="docs/img/mayavi.png" alt="drawing" width= 700>
+
+You can now proceed to Section [Additional Packages](#additional-packages) to finish the installation. 
+
+If your Mayavi installation was not successful, please contact the author. 
+
+## Other Operating-System
+For any other Operating-System, execute the following command:
+
+`conda create -n yourEnvName python=3.7`
+
+`conda activate yourEnvName`
+
+`pip install numpy vtk pyqt5`
+
+`pip install mayavi`
+
+Mayavi should be launched as displayed below. 
+
+<img src="docs/img/mayavi.png" alt="drawing" width= 700>
+
+You can now proceed to Section [Additional Packages](#additional-packages) to finish the installation. 
+
+If your Mayavi installation was not successful, please contact the author. 
+
+## Additional packages
+
+The following packages need to be installed:
+
+* Pyqtgraph:
 
 `pip install pyqtgraph`
 
-Install numba:
+* Numba
 
 `pip install numba`
 
-Install Pandas
+* Pandas
 
 `conda install -c anaconda pandas`
 
-Install Quaternion
+* Quaternion
 
 `conda install -c conda-forge quaternion`
 
-Install Matplotlib
+* Matplotlib
 
 `conda install -c conda-forge matplotlib`
 
-
-Install Scipy
+* Scipy
 
 `conda install -c anaconda scipy`
 
@@ -72,7 +109,7 @@ So if using Windows and you face problems running the visualizer, perform the tw
 
 `pip install -U apptools`
 
-You should be ready to use the Q-D visualizer.
+You should be ready to use the Q-D Interpreter.
 
 # First Steps
 
