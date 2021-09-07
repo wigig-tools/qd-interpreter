@@ -392,6 +392,11 @@ class Visualization(HasTraits):
         guiDisplaySls = Bool(False)
     guiSlsMode = Enum("Oracle", "ns-3")
 
+    if qdScenario.qdInterpreterConfig.dataMode == "preprocessed":
+        guiSlsDataModePreprocessed = Bool(True)
+    else:
+        guiSlsDataModePreprocessed = Bool(False)
+
     guiTxssTxRxTxId = Str
     guiTxssTxRxTxType = Str
     guiTxssTxRxRxId = Str
@@ -1840,7 +1845,7 @@ class Visualization(HasTraits):
     #            FUNCTION TO UPDATE THE VISUALIZATION                     #
     #######################################################################
     @on_trait_change(
-        'guiTxNodeSelected,guiRxNodeSelected,guiTargetSelected,guiTxPaaSelected,guiRxPaaSelected,traceIndex,guiDisplayPaaTxAxis,guiDisplayPaaRxAxis,guiDisplayDeviceTxAxis,guiDisplayDeviceRxAxis,guiDisplayMimo,guiBeamtrackingType')
+        'guiTxNodeSelected,guiRxNodeSelected,guiTargetSelected,guiTxPaaSelected,guiRxPaaSelected,traceIndex,guiDisplayPaaTxAxis,guiDisplayPaaRxAxis,guiDisplayDeviceTxAxis,guiDisplayDeviceRxAxis,guiDisplayMimo,guiBeamtrackingType,guiDisplaySls')
     def updateNewSelection(self, obj, name, old, new):
         """Handle most of the changes occuring in the interface (Tx/Rx selection changed, PAA Tx/Rx changed, etc)
 
@@ -1885,18 +1890,20 @@ class Visualization(HasTraits):
             self.updateOrientationAxes(txNode, rxNode, paaTx, paaRx)
 
         if qdScenario.qdInterpreterConfig.slsEnabled:
-            if self.guiSlsMode == "Oracle":
-                if self.guiDisplaySls  and qdScenario.qdInterpreterConfig.dataMode != "none":
-                    self.updateSlsVisuals(txNode, rxNode, paaTx, paaRx)
-                else:
-                    globals.logger.warning("SLS mode selected: Oracle but dataMode set to None - Please set dataMode to online or preprocessed when launching the visualizer to visualize SLS with Oracle")
-            elif self.guiSlsMode == "ns-3":
-                if self.guiDisplaySls and not qdScenario.nsSlsResults.empty:
-                    # Display SLS between Tx and Rx
-                    self.updateSlsVisuals(txNode, rxNode, paaTx, paaRx)
-                else:
-                    globals.logger.warning(
-                        "SLS mode selected: ns-3 but no SLS results available")
+            if self.guiDisplaySls:
+                if self.guiSlsMode == "Oracle":
+                     if qdScenario.qdInterpreterConfig.dataMode != "none":
+                        self.updateSlsVisuals(txNode, rxNode, paaTx, paaRx)
+                     else:
+                        globals.logger.warning(
+                            "SLS mode selected: Oracle but dataMode set to None - Please set dataMode to online or preprocessed when launching the visualizer to visualize SLS with Oracle")
+                elif self.guiSlsMode == "ns-3":
+                    if not qdScenario.nsSlsResults.empty:
+                        # Display SLS between Tx and Rx
+                        self.updateSlsVisuals(txNode, rxNode, paaTx, paaRx)
+                    else:
+                        globals.logger.warning(
+                            "SLS mode selected: ns-3 but no SLS results available")
 
 
                 # Update the BFT ID in the GUI
@@ -2275,9 +2282,13 @@ class Visualization(HasTraits):
 
         if qdScenario.getNodeType(int(self.guiTxNodeSelected)) == globals.NodeType.STA and self.guiShowSlsBestAp:
             # User wants to display the best AP the STA can associate too
-            self.displayMpcs(
-                qdScenario.preprocessedAssociationData[(int(self.guiTxNodeSelected), int(self.traceIndex))][1], paaRx,
-                txNode, paaTx, self.traceIndex, self.guiMpcsMagnifier)
+            if self.guiSlsMode == "Oracle" and qdScenario.qdInterpreterConfig.dataMode == "preprocessed":
+                self.displayMpcs(
+                    qdScenario.preprocessedAssociationData[(int(self.guiTxNodeSelected), int(self.traceIndex))][1], paaRx,
+                    txNode, paaTx, self.traceIndex, self.guiMpcsMagnifier)
+            else:
+                globals.logger.warning(
+                    "Display best AP is available only when the dataMode is set to Preprocessed and SLS is set to Oracle")
         else:
             if txNode < rxNode:
                 self.displayMpcs(txNode, paaTx, rxNode, paaRx, self.traceIndex, self.guiMpcsMagnifier)
@@ -2370,7 +2381,8 @@ class Visualization(HasTraits):
             else:
                 viewObjects = self.environmentObjects[self.view2.mayavi_scene]
             viewObjects[currentSelectedObject].textureMode = self.guiTextureMode
-            viewObjects[currentSelectedObject].customTexture = str(globals.textureFolder + self.guiVisualizerTextures)
+            # viewObjects[currentSelectedObject].customTexture = str(globals.textureFolder + self.guiVisualizerTextures)
+            viewObjects[currentSelectedObject].customTexture = os.path.join(globals.textureFolder,self.guiVisualizerTextures)
             self.assignMaterialTexture(viewObjects[currentSelectedObject])
             self.forceRender()
 
@@ -4082,7 +4094,9 @@ class Visualization(HasTraits):
             # Oracle is used
             if self.guiDisplayStaAssociation:
                 # The user selected to display the STA association
-                self.makeVisible(self.stasAssociationVisObj)
+                if (qdScenario.qdInterpreterConfig.dataMode == "preprocessed") or (
+                        qdScenario.qdInterpreterConfig.dataMode == "online" and qdScenario.qdInterpreterConfig.plotData):
+                    self.makeVisible(self.stasAssociationVisObj)
 
     @on_trait_change('guiDisplayStaAssociation')
     def showStaAssociation(self):
@@ -4096,11 +4110,12 @@ class Visualization(HasTraits):
                 else:
                     self.makeInvisible(self.stasAssociationVisObj)
             else:
+                self.makeInvisible(self.stasAssociationVisObj)
                 globals.logger.warning(
-                    "STA association can only be displayed if dataMode set to online if the --curves option is used")
-
-
+                    "STA association can only be displayed if dataMode is set to preprocessed or set to online and --curves option is used")
         else:
+            if self.guiDisplayStaAssociation:
+                globals.logger.warning("STA association data not available when ns-3 mode is selected")
             self.makeInvisible(self.stasAssociationVisObj)
         self.forceRender()
 
@@ -4256,24 +4271,25 @@ class Visualization(HasTraits):
 
     @on_trait_change('guiMimoStream')
     def selectMimoStream(self):
-        if qdScenario.qdInterpreterConfig.mimo != "beamTracking":
-            # BeamTracking don't use the notion of PAA yet
-            self.guiMimoTxStreamIdentifier = self.bestreamPaaIdCombination[self.guiMimoStream][0]
-            self.guiMimoRxStreamIdentifier = self.bestreamPaaIdCombination[self.guiMimoStream][1]
-
         if self.guiDisplayMimo:
-            self.guiMimoTxSector = self.bestSectorsCombination[0][self.guiMimoStream]
-            self.guiMimoRxSector = self.bestSectorsCombination[1][self.guiMimoStream]
+            if qdScenario.qdInterpreterConfig.mimo != "beamTracking":
+                # BeamTracking don't use the notion of PAA yet
+                self.guiMimoTxStreamIdentifier = self.bestreamPaaIdCombination[self.guiMimoStream][0]
+                self.guiMimoRxStreamIdentifier = self.bestreamPaaIdCombination[self.guiMimoStream][1]
+
+            if self.guiDisplayMimo:
+                self.guiMimoTxSector = self.bestSectorsCombination[0][self.guiMimoStream]
+                self.guiMimoRxSector = self.bestSectorsCombination[1][self.guiMimoStream]
 
 
-            # Update the GUI
-            self.guiMimoStreamSize = self.mimoStreamPatternSize[self.guiMimoStream]
-            self.guiMimoStreamColor = (self.mimoStreamProperties[self.guiMimoStream].color[0] * 255,
-                                         self.mimoStreamProperties[self.guiMimoStream].color[1] * 255,
-                                         self.mimoStreamProperties[self.guiMimoStream].color[2] * 255)
+                # Update the GUI
+                self.guiMimoStreamSize = self.mimoStreamPatternSize[self.guiMimoStream]
+                self.guiMimoStreamColor = (self.mimoStreamProperties[self.guiMimoStream].color[0] * 255,
+                                             self.mimoStreamProperties[self.guiMimoStream].color[1] * 255,
+                                             self.mimoStreamProperties[self.guiMimoStream].color[2] * 255)
 
-            self.guiMimoStreamMpcSize = self.mimoStreamProperties[self.guiMimoStream].width
-            self.guiMimoEdgesSize = self.mimoStreamEdgeSize[self.guiMimoStream]
+                self.guiMimoStreamMpcSize = self.mimoStreamProperties[self.guiMimoStream].width
+                self.guiMimoEdgesSize = self.mimoStreamEdgeSize[self.guiMimoStream]
 
     @on_trait_change('guiMimoStreamOpacity')
     def changeStreamOpacity(self):
@@ -4927,7 +4943,7 @@ class Visualization(HasTraits):
 
             Item(name='guiDisplayStaAssociation', width=-200, label='Display STAs Association'),
             Item(name='guiShowSlsBestAp', label='Show Best AP for STA',
-                 visible_when='guiTxssTxRxTxType == "(STA)" and guiTxssRxTxTxType == "(AP)"'),
+                 visible_when='guiTxssTxRxTxType == "(STA)" and guiTxssRxTxTxType == "(AP)" and guiSlsDataModePreprocessed == True'),
             label='Association properties',
             show_border=True),
         VGroup(
@@ -5026,7 +5042,7 @@ class Visualization(HasTraits):
                             ),
                             HGroup(
                                 Item(name='guiMpcsMagnifier',  label='MPCs Size'),
-                                Item('guiMpcColor', editor=ColorEditor(), label='Color',style='custom'),
+                                Item('guiMpcColor', editor=ColorEditor(), label='Color'),
 
                             ),
 
@@ -5099,7 +5115,7 @@ class Visualization(HasTraits):
 
                     ),
                     VGroup(
-                        Item('guiObjectColor', editor=ColorEditor(),  label='Object Color', style='custom'),
+                        Item('guiObjectColor', editor=ColorEditor(),  label='Object Color'),
                         HGroup(
                             Item('guiVisualizerTextures', label='texture', style='simple'),
                             Item(name='guiTextureMode', label='Interpolation'),
@@ -5195,7 +5211,7 @@ class Visualization(HasTraits):
                 Item(name='guiMimoStreamOpacity', label='Opacity'),
             ),
 
-            Item('guiMimoStreamColor', editor=ColorEditor(), label='Stream Color', style='custom'),
+            Item('guiMimoStreamColor', editor=ColorEditor(), label='Stream Color'),
             Item('guiButtonSaveMimoConfig',show_label=False),
 
             label='Streams Visualization',
@@ -5232,7 +5248,7 @@ class Visualization(HasTraits):
             label='Scenario Interaction',
             show_border=True),
         VGroup(
-            Item('guiSensingTargetColor', editor=ColorEditor(), label='Target Color', style='custom'),
+            Item('guiSensingTargetColor', editor=ColorEditor(), label='Target Color'),
             Item('guiButtonSaveSensingConfig', height=-35, width=-500, label='Save Configuration'),
             label='Tweak',
             show_border=True),
@@ -5387,7 +5403,7 @@ if __name__ == "__main__":
         Y_CURVE_LEGEND["Power Per Sector"] = powerPerSectorWidget.addLegend(offset=(80, 30))
         powerPerSectorPlotItem = powerPerSectorWidget.plotItem
         # powerPerSectorPlotItem.setYRange(-100, -40, padding=0)
-        powerPerSectorPlotItem.setLabel('left', 'Power (Dbm)', **labelStyle)
+        powerPerSectorPlotItem.setLabel('left', 'Power (dBm)', **labelStyle)
         powerPerSectorPlotItem.setLabel('bottom', 'Sector ID', **labelStyle)
         powerPerSectorPlotItem.showGrid(True, True)
         axisX = powerPerSectorPlotItem.getAxis('bottom')
