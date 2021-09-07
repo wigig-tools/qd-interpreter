@@ -39,9 +39,7 @@ For Windows-based system, execute the following command:
 
 `pip install pyqt5`
 
-`conda install -c menpo mayavi`
-
-`pip install mayavi`
+`conda install -c anaconda mayavi`
 
 You can check that Mayavi is correctly installed using the following command:
 
@@ -578,7 +576,7 @@ The new features allows to:
 * Visualize the MPCs from the sensing transmitter to the targets, and from the targets to the sensing receiver.
 * Visualize the doppler range map.
 
-The scenario used to demonstrate sensing visualization is `SensingTwoTargets`. The scenario is made of one sensing transmitter (AP0) and one sensing receiver (AP1). Two targets are moving in the room and the scenario is made of 2680 traces.  
+The scenario used to demonstrate sensing visualization is `SensingTwoTargets`. The scenario is made of one sensing transmitter (AP0) and one sensing receiver (AP1). Two targets are moving in the room and the scenario is made of 2680 traces. 
 
 ## Configure the sensing visualization
 
@@ -621,6 +619,15 @@ You can then resize the window to get rid of the `left` view.
 When ready, you can now press the `play` icon and observe the sensing scenario as displayed below. 
 
 <img src="docs/gif/SensingTargets.gif" alt="drawing">
+
+When using the `sensing` mode, you can observe a third window appearing on the rightmost part of the visualizer. This window displays the Doppler Range Map. The Doppler Range map results are located in the `Output\Visualizer` folder and are made of two files:
+* `axis.txt`: Contains slow time, fast time and velocity axes values.
+* `rangeDoppler.txt`: conbtains the range doppler results.
+
+If one of these two files is missing, the third window is not displayed.
+
+Please note that you can filter the velocity displayed in the Doppler Range Map using the `--filterVelocity` option. For example, to limit the velocity displayed between -2,+2 m/s, you can use the following command:
+`python qdVisualizer.py --s SensingTwoTargets --sensing --filterVelocity -2 2`
 
 # More about the Oracle mode
 
