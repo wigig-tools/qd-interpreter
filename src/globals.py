@@ -101,7 +101,7 @@ defaultStaCodebook = "ura_28x_siso_37sectors.txt"  # Default Codebook used by th
 qdFilesFolder = "QdFiles"  # The Folder containing the Q-D files
 positionPrefix = "NodePositionsTrc"  # The folder containing the nodes mobility parameter
 nodePositionJSON = "NodePositions.json"
-targetPositionJSON = "TargetBasePositions.json"
+targetPositionJSON = "TargetPositions.json"
 targetMpcJSON = "targetMpc.json"
 
 mpcJSON = "Mpc.json"

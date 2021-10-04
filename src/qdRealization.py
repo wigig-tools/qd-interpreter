@@ -699,10 +699,9 @@ def readTargetConnectionFile(scenarioQdVisualizerFolder, qdScenario):
         qdScenario: QdScenario class
             Scenario parameters (Use to store the target information in this case.)
     """
-    connectionFilePrefix = "target"
-    connectionFileSuffix = "connection.txt"
+    connectionFilePrefix = "TargetConnection"
     for i in range(qdScenario.nbTargets):
-        filename = os.path.join(scenarioQdVisualizerFolder, connectionFilePrefix + str(i) + connectionFileSuffix)
+        filename = os.path.join(scenarioQdVisualizerFolder, connectionFilePrefix + str(i) + ".txt")
         try:
             with open (filename) as read_obj:
                 # pass the file object to reader() to get the reader object
